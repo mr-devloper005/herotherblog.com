@@ -11,7 +11,8 @@ const nextConfig = {
   },
   images: {
     formats: ["image/avif", "image/webp"],
-    minimumCacheTTL: 60 * 60 * 24 * 7,
+    // Long TTL is great in prod but makes local /_next/image caches stick after replacing public/*.png
+    minimumCacheTTL: isProd ? 60 * 60 * 24 * 7 : 60,
     remotePatterns: [
       { protocol: "https", hostname: "**" },
       { protocol: "http", hostname: "**" },
