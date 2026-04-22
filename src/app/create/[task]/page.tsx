@@ -3,8 +3,10 @@
 import { useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Plus, Save } from "lucide-react";
+import { ArrowLeft, FileText, Plus, Save, User } from "lucide-react";
 import { NavbarShell } from "@/components/shared/navbar-shell";
+import { Footer } from "@/components/shared/footer";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,6 +17,8 @@ import { useAuth } from "@/lib/auth-context";
 import { CATEGORY_OPTIONS } from "@/lib/categories";
 import { SITE_CONFIG, type TaskKey } from "@/lib/site-config";
 import { addLocalPost } from "@/lib/local-posts";
+
+const ACCENT = "#2563eb";
 
 type Field = {
   key: string;
@@ -176,6 +180,7 @@ export default function CreateTaskPage() {
     [taskKey]
   );
   const formConfig = FORM_CONFIG[taskKey];
+  const isLibraryShell = taskKey === "profile" || taskKey === "pdf";
 
   const [values, setValues] = useState<Record<string, string>>({});
   const [uploadingPdf, setUploadingPdf] = useState(false);
@@ -270,124 +275,212 @@ export default function CreateTaskPage() {
     router.push(`/local/${taskKey}/${post.slug}`);
   };
 
+  const HeroIcon = taskKey === "profile" ? User : FileText;
+
+  const formFields = (
+    <>
+      <div
+        className={cn(
+          "flex flex-wrap gap-2",
+          isLibraryShell && "rounded-xl border border-slate-100 bg-slate-50/60 p-3"
+        )}
+      >
+        <Badge
+          variant="secondary"
+          className={cn(isLibraryShell && "border-blue-100 bg-blue-50 text-blue-900")}
+        >
+          {taskConfig.label}
+        </Badge>
+        <Badge variant="outline" className={cn(isLibraryShell && "border-slate-200 text-slate-600")}>
+          Local-only
+        </Badge>
+      </div>
+
+      <div className="mt-6 grid gap-6">
+        {formConfig.fields.map((field) => (
+          <div key={field.key} className="grid gap-2">
+            <Label className={cn(isLibraryShell && "text-slate-700")}>
+              {field.label} {field.required ? <span className="text-red-500">*</span> : null}
+            </Label>
+            {field.type === "textarea" ? (
+              <Textarea
+                rows={4}
+                placeholder={field.placeholder}
+                value={values[field.key] || ""}
+                onChange={(event) => updateValue(field.key, event.target.value)}
+                className={cn(
+                  "border-2 border-slate-200 bg-white focus-visible:ring-2 focus-visible:ring-primary/30",
+                  isLibraryShell &&
+                    "rounded-xl border border-slate-200 focus-visible:border-blue-400 focus-visible:ring-blue-100"
+                )}
+              />
+            ) : field.type === "category" ? (
+              <select
+                value={values[field.key] || ""}
+                onChange={(event) => updateValue(field.key, event.target.value)}
+                className={cn(
+                  "h-11 rounded-lg border-2 border-slate-200 bg-white px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+                  isLibraryShell &&
+                    "rounded-xl border border-slate-200 bg-slate-50/80 focus-visible:border-blue-400 focus-visible:ring-blue-100"
+                )}
+              >
+                <option value="">Select category</option>
+                {CATEGORY_OPTIONS.map((option) => (
+                  <option key={option.slug} value={option.slug}>
+                    {option.name}
+                  </option>
+                ))}
+              </select>
+            ) : field.type === "file" ? (
+              <div className="grid gap-3">
+                <Input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (!file) return;
+                    if (file.type !== "application/pdf") {
+                      toast({
+                        title: "Invalid file",
+                        description: "Please upload a PDF file.",
+                      });
+                      return;
+                    }
+                    const reader = new FileReader();
+                    setUploadingPdf(true);
+                    reader.onload = () => {
+                      const result = typeof reader.result === "string" ? reader.result : "";
+                      updateValue(field.key, result);
+                      setUploadingPdf(false);
+                      toast({
+                        title: "PDF uploaded",
+                        description: "File is stored locally.",
+                      });
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                  className={cn(isLibraryShell && "cursor-pointer rounded-xl border-slate-200 bg-white")}
+                />
+                <Input
+                  type="text"
+                  placeholder="Or paste a PDF URL"
+                  value={values[field.key] || ""}
+                  onChange={(event) => updateValue(field.key, event.target.value)}
+                  className={cn(isLibraryShell && "h-11 rounded-xl border-slate-200")}
+                />
+                {uploadingPdf ? (
+                  <p className="text-xs text-muted-foreground">Uploading PDF…</p>
+                ) : null}
+              </div>
+            ) : (
+              <Input
+                type={field.type === "number" ? "number" : "text"}
+                placeholder={
+                  field.type === "images" || field.type === "tags" || field.type === "highlights"
+                    ? "Separate values with commas"
+                    : field.placeholder
+                }
+                value={values[field.key] || ""}
+                onChange={(event) => updateValue(field.key, event.target.value)}
+                className={cn(
+                  "h-11 border-2 border-slate-200 bg-white focus-visible:ring-2 focus-visible:ring-primary/30",
+                  isLibraryShell &&
+                    "rounded-xl border border-slate-200 bg-slate-50/80 focus-visible:border-blue-400 focus-visible:ring-blue-100"
+                )}
+              />
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-8 flex flex-wrap gap-3">
+        <Button
+          onClick={handleSubmit}
+          className={cn(isLibraryShell && "rounded-full px-6 font-semibold text-white shadow-md hover:opacity-90")}
+          style={isLibraryShell ? { backgroundColor: ACCENT } : undefined}
+        >
+          <Save className="mr-2 h-4 w-4" />
+          Save locally
+        </Button>
+        <Button variant="outline" asChild className={cn(isLibraryShell && "rounded-full border-slate-200 font-semibold")}>
+          <Link href={taskConfig.route}>
+            View {taskConfig.label}
+            <Plus className="ml-2 h-4 w-4" />
+          </Link>
+        </Button>
+      </div>
+    </>
+  );
+
   return (
-    <div className="min-h-screen bg-background">
+    <div
+      className={cn(
+        "min-h-screen",
+        isLibraryShell
+          ? "bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900"
+          : "bg-background"
+      )}
+    >
       <NavbarShell />
-      <main className="mx-auto max-w-4xl px-4 py-12">
-        <div className="mb-8 flex items-center gap-3">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/">
+      <main
+        className={cn("mx-auto max-w-4xl px-4", isLibraryShell ? "py-10 sm:py-14" : "py-12")}
+      >
+        <div className={cn("mb-8 flex items-center gap-3", isLibraryShell && "sm:mb-10")}>
+          <Button
+            variant="ghost"
+            size="icon"
+            asChild
+            className={cn(isLibraryShell && "rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50")}
+          >
+            <Link href={isLibraryShell ? taskConfig.route : "/"}>
               <ArrowLeft className="h-5 w-5" />
             </Link>
           </Button>
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">{formConfig.title}</h1>
-            <p className="text-sm text-muted-foreground">{formConfig.description}</p>
-          </div>
-        </div>
-
-        <div className="rounded-3xl border border-border bg-card p-8 shadow-sm">
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary">{taskConfig.label}</Badge>
-            <Badge variant="outline">Local-only</Badge>
-          </div>
-
-          <div className="mt-6 grid gap-6">
-            {formConfig.fields.map((field) => (
-              <div key={field.key} className="grid gap-2">
-                <Label>
-                  {field.label} {field.required ? <span className="text-red-500">*</span> : null}
-                </Label>
-                {field.type === "textarea" ? (
-                  <Textarea
-                    rows={4}
-                    placeholder={field.placeholder}
-                    value={values[field.key] || ""}
-                    onChange={(event) => updateValue(field.key, event.target.value)}
-                    className="border-2 border-slate-200 bg-white focus-visible:ring-2 focus-visible:ring-primary/30"
-                  />
-                ) : field.type === "category" ? (
-                  <select
-                    value={values[field.key] || ""}
-                    onChange={(event) => updateValue(field.key, event.target.value)}
-                    className="h-11 rounded-lg border-2 border-slate-200 bg-white px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-                  >
-                    <option value="">Select category</option>
-                    {CATEGORY_OPTIONS.map((option) => (
-                      <option key={option.slug} value={option.slug}>
-                        {option.name}
-                      </option>
-                    ))}
-                  </select>
-                ) : field.type === "file" ? (
-                  <div className="grid gap-3">
-                    <Input
-                      type="file"
-                      accept="application/pdf"
-                      onChange={(event) => {
-                        const file = event.target.files?.[0];
-                        if (!file) return;
-                        if (file.type !== "application/pdf") {
-                          toast({
-                            title: "Invalid file",
-                            description: "Please upload a PDF file.",
-                          });
-                          return;
-                        }
-                        const reader = new FileReader();
-                        setUploadingPdf(true);
-                        reader.onload = () => {
-                          const result = typeof reader.result === "string" ? reader.result : "";
-                          updateValue(field.key, result);
-                          setUploadingPdf(false);
-                          toast({
-                            title: "PDF uploaded",
-                            description: "File is stored locally.",
-                          });
-                        };
-                        reader.readAsDataURL(file);
-                      }}
-                    />
-                    <Input
-                      type="text"
-                      placeholder="Or paste a PDF URL"
-                      value={values[field.key] || ""}
-                      onChange={(event) => updateValue(field.key, event.target.value)}
-                    />
-                    {uploadingPdf ? (
-                      <p className="text-xs text-muted-foreground">Uploading PDF…</p>
-                    ) : null}
-                  </div>
-                ) : (
-                  <Input
-                    type={field.type === "number" ? "number" : "text"}
-                    placeholder={
-                      field.type === "images" || field.type === "tags" || field.type === "highlights"
-                        ? "Separate values with commas"
-                        : field.placeholder
-                    }
-                    value={values[field.key] || ""}
-                    onChange={(event) => updateValue(field.key, event.target.value)}
-                    className="h-11 border-2 border-slate-200 bg-white focus-visible:ring-2 focus-visible:ring-primary/30"
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button onClick={handleSubmit}>
-              <Save className="mr-2 h-4 w-4" />
-              Save locally
-            </Button>
-            <Button variant="ghost" asChild>
-              <Link href={taskConfig.route}>
-                View {taskConfig.label}
-                <Plus className="ml-2 h-4 w-4" />
+          {!isLibraryShell ? (
+            <div>
+              <h1 className="text-2xl font-semibold text-foreground">{formConfig.title}</h1>
+              <p className="text-sm text-muted-foreground">{formConfig.description}</p>
+            </div>
+          ) : (
+            <div className="text-sm text-slate-600">
+              Back to{" "}
+              <Link href={taskConfig.route} className="font-semibold text-blue-600 hover:underline">
+                {taskConfig.label}
               </Link>
-            </Button>
-          </div>
+            </div>
+          )}
         </div>
+
+        {isLibraryShell ? (
+          <>
+            <section className="mb-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_20px_50px_rgba(37,99,235,0.08)]">
+              <div className="grid gap-6 p-6 sm:grid-cols-[1fr_auto] sm:items-center sm:p-8">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">
+                    {taskKey === "profile" ? "Contributor profile" : "PDF library"}
+                  </p>
+                  <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                    {formConfig.title}
+                  </h1>
+                  <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-600">
+                    {formConfig.description}
+                  </p>
+                </div>
+                <div className="flex h-24 w-full items-center justify-center rounded-2xl bg-blue-50 sm:h-28 sm:w-28 sm:shrink-0">
+                  <HeroIcon className="h-10 w-10 sm:h-12 sm:w-12" style={{ color: ACCENT }} />
+                </div>
+              </div>
+            </section>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+              {formFields}
+            </div>
+
+            <Footer />
+          </>
+        ) : (
+          <div className="rounded-3xl border border-border bg-card p-8 shadow-sm">{formFields}</div>
+        )}
       </main>
     </div>
   );
