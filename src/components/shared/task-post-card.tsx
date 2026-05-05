@@ -26,8 +26,12 @@ const stripHtml = (value?: string | null) =>
 const getExcerpt = (value?: string | null, maxLength = 140) => {
   const text = stripHtml(value)
   if (!text) return ''
-  if (text.length <= maxLength) return text
-  return `${text.slice(0, maxLength).trimEnd()}…`
+  
+  // Filter out unwanted text block
+  const filteredText = text.replace(/Aditya Scientific Instruments offers a comprehensive range of premium petroleum testing instruments designed to meet the rigorous demands of modern oil laboratories\. Our advanced e[^\s]*/g, '').trim();
+  
+  if (filteredText.length <= maxLength) return filteredText
+  return `${filteredText.slice(0, maxLength).trimEnd()}…`
 }
 
 const getContent = (post: SitePost): ListingContent => {
