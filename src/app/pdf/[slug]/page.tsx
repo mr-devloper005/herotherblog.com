@@ -8,6 +8,7 @@ import { SchemaJsonLd } from "@/components/seo/schema-jsonld";
 import { buildPostMetadata, buildTaskMetadata } from "@/lib/seo";
 import { buildPostUrl, fetchTaskPostBySlug, fetchTaskPosts } from "@/lib/task-data";
 import { SITE_CONFIG } from "@/lib/site-config";
+import PdfDetailClient from "@/components/pdf/pdf-detail-client";
 
 export const revalidate = 3;
 
@@ -53,7 +54,7 @@ export default async function PdfDetailPage({ params }: { params: Promise<{ slug
     notFound();
   }
 
-  const viewerUrl = `${fileUrl}#toolbar=0&navpanes=0&scrollbar=0`;
+  const viewerUrl = fileUrl;
   const baseUrl = SITE_CONFIG.baseUrl.replace(/\/$/, "");
   const category =
     typeof contentAny.category === "string" ? contentAny.category : "";
@@ -95,78 +96,12 @@ export default async function PdfDetailPage({ params }: { params: Promise<{ slug
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <NavbarShell />
-      <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
-        <SchemaJsonLd data={breadcrumbData} />
-        <Link
-          href="/pdf"
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
-          ← Back to PDF Library
-        </Link>
-        <h1 className="text-2xl font-semibold text-foreground">{post.title}</h1>
-        <div className="overflow-hidden rounded-2xl bg-background">
-          <iframe
-            src={viewerUrl}
-            title={post.title}
-            className="h-[85vh] w-full"
-          />
-        </div>
-        <div className="flex items-center gap-3">
-          <a
-            href={fileUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
-          >
-            Download PDF
-          </a>
-        </div>
-        {related.length ? (
-          <section className="pt-4">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-foreground">More like this</h2>
-              <Link
-                href="/pdf"
-                className="text-sm text-muted-foreground hover:text-foreground"
-              >
-                View all
-              </Link>
-            </div>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {related.map((item) => (
-                <TaskPostCard
-                  key={item.id}
-                  post={item}
-                  href={buildPostUrl("pdf", item.slug)}
-                />
-              ))}
-            </div>
-            <nav className="mt-6 rounded-2xl border border-border bg-card/60 p-4">
-              <p className="text-sm font-semibold text-foreground">Related links</p>
-              <ul className="mt-2 space-y-2 text-sm">
-                {related.map((item) => (
-                  <li key={`related-${item.id}`}>
-                    <Link
-                      href={buildPostUrl("pdf", item.slug)}
-                      className="text-primary underline-offset-4 hover:underline"
-                    >
-                      {item.title}
-                    </Link>
-                  </li>
-                ))}
-                <li>
-                  <Link href="/pdf" className="text-primary underline-offset-4 hover:underline">
-                    Browse all PDFs
-                  </Link>
-                </li>
-              </ul>
-            </nav>
-          </section>
-        ) : null}
-      </main>
-      <Footer />
-    </div>
+    <PdfDetailClient 
+      post={post}
+      fileUrl={fileUrl}
+      category={category}
+      related={related}
+      breadcrumbData={breadcrumbData}
+    />
   );
 }

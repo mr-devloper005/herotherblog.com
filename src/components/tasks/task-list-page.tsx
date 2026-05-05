@@ -37,6 +37,7 @@ const variantShells = {
   'classified-market': 'bg-[linear-gradient(180deg,#f4f6ef_0%,#ffffff_100%)]',
   'sbm-curation': 'bg-[linear-gradient(180deg,#fff7ee_0%,#ffffff_100%)]',
   'sbm-library': 'bg-[linear-gradient(180deg,#f7f8fc_0%,#ffffff_100%)]',
+  'pdf-library': 'bg-[radial-gradient(ellipse_at_top_right,rgba(139,92,246,0.08),transparent_50%),radial-gradient(ellipse_at_bottom_left,rgba(59,130,246,0.05),transparent_40%),linear-gradient(135deg,#ffffff_0%,#f8fafc_50%,#ffffff_100%)] text-slate-900',
 } as const
 
 export async function TaskListPage({ task, category }: { task: TaskKey; category?: string }) {
@@ -57,18 +58,27 @@ export async function TaskListPage({ task, category }: { task: TaskKey; category
   }))
   const { recipe } = getFactoryState()
   const layoutKey = recipe.taskLayouts[task as keyof typeof recipe.taskLayouts] || `${task}-${task === 'listing' ? 'directory' : 'editorial'}`
-  const shellClass = variantShells[layoutKey as keyof typeof variantShells] || 'bg-background'
+  const isPdfTask = task === 'pdf'
+  const shellClass = isPdfTask ? variantShells['pdf-library'] : (variantShells[layoutKey as keyof typeof variantShells] || 'bg-background')
   const Icon = taskIcons[task] || LayoutGrid
 
-  const isDark = ['image-masonry', 'image-portfolio', 'profile-creator'].includes(layoutKey)
+  const isDark = ['image-masonry', 'image-portfolio', 'profile-creator'].includes(layoutKey) || isPdfTask
   const ui = isDark
-    ? {
-        muted: 'text-slate-300',
-        panel: 'border border-white/10 bg-white/6',
-        soft: 'border border-white/10 bg-white/5',
-        input: 'border-white/10 bg-white/6 text-white',
-        button: 'bg-white text-slate-950 hover:bg-slate-200',
-      }
+    ? isPdfTask 
+      ? {
+          muted: 'text-slate-600',
+          panel: 'border border-slate-200 bg-white/90 backdrop-blur-sm shadow-lg',
+          soft: 'border border-slate-200 bg-slate-50 backdrop-blur-sm',
+          input: 'border-slate-300 bg-white text-slate-900 placeholder:text-slate-500',
+          button: 'bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white border-0 shadow-lg',
+        }
+      : {
+          muted: 'text-slate-300',
+          panel: 'border border-white/10 bg-white/6',
+          soft: 'border border-white/10 bg-white/5',
+          input: 'border-white/10 bg-white/6 text-white',
+          button: 'bg-white text-slate-950 hover:bg-slate-200',
+        }
     : layoutKey.startsWith('article') || layoutKey.startsWith('sbm')
       ? {
           muted: 'text-[#72594a]',
@@ -233,6 +243,61 @@ export async function TaskListPage({ task, category }: { task: TaskKey; category
                 </select>
                 <button type="submit" className={`h-11 rounded-xl px-4 text-sm font-medium ${ui.button}`}>Apply</button>
               </form>
+            </div>
+          </section>
+        ) : null}
+
+        {isPdfTask ? (
+          <section className="mb-12">
+            <div className={`rounded-[3rem] p-8 md:p-12 shadow-2xl ${ui.panel} backdrop-blur-md border border-slate-200`}>
+              <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+                <div>
+                  <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 bg-gradient-to-r from-violet-600/10 to-blue-600/10 border border-violet-200">
+                    <Icon className="h-4 w-4 text-violet-600" />
+                    <span className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-700">PDF Library</span>
+                  </div>
+                  <h1 className="mt-6 text-5xl md:text-6xl font-bold tracking-[-0.06em] text-slate-900">
+                    Digital Document
+                    <br />
+                    <span className="bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">Collection</span>
+                  </h1>
+                  <p className={`mt-6 text-lg leading-8 ${ui.muted}`}>
+                    Explore our curated collection of PDFs with advanced filtering, preview capabilities, and seamless download experience. Designed for researchers, professionals, and knowledge seekers.
+                  </p>
+                  <div className="mt-8 flex flex-wrap gap-4">
+                    <div className={`rounded-2xl p-4 ${ui.soft} border border-slate-200`}>
+                      <div className="text-2xl font-bold text-slate-900">{posts.length}</div>
+                      <div className={`text-sm ${ui.muted}`}>Total Documents</div>
+                    </div>
+                    <div className={`rounded-2xl p-4 ${ui.soft} border border-slate-200`}>
+                      <div className="text-2xl font-bold text-slate-900">{CATEGORY_OPTIONS.length}</div>
+                      <div className={`text-sm ${ui.muted}`}>Categories</div>
+                    </div>
+                  </div>
+                </div>
+                <div className={`rounded-[2rem] p-6 ${ui.soft} border border-slate-200`}>
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center">
+                      <Icon className="h-4 w-4 text-white" />
+                    </div>
+                    <span className={`text-sm font-semibold uppercase tracking-[0.2em] ${ui.muted}`}>Filter Library</span>
+                  </div>
+                  <form className="space-y-4" action={taskConfig?.route || '#'}>
+                    <div>
+                      <label className={`text-xs uppercase tracking-[0.2em] ${ui.muted} block mb-2`}>Category</label>
+                      <select name="category" defaultValue={normalizedCategory} className={`w-full h-12 rounded-xl px-4 text-sm ${ui.input}`}>
+                        <option value="all">All categories</option>
+                        {CATEGORY_OPTIONS.map((item) => (
+                          <option key={item.slug} value={item.slug}>{item.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <button type="submit" className={`w-full h-12 rounded-xl text-sm font-semibold ${ui.button} transition-all duration-200 transform hover:scale-[1.02]`}>
+                      Apply Filters
+                    </button>
+                  </form>
+                </div>
+              </div>
             </div>
           </section>
         ) : null}
