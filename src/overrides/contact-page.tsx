@@ -62,11 +62,10 @@ export function ContactPageOverride() {
 
       {/* Contact Info Cards */}
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="grid gap-5 md:grid-cols-4">
+        <div className="grid gap-5 md:grid-cols-3">
           {[
             { icon: Mail, title: 'Email Us', value: 'hello@' + SITE_CONFIG.domain, sub: 'We reply within 24h' },
             { icon: Phone, title: 'Call Us', value: '+1 (555) 123-4567', sub: 'Mon–Fri 9am to 6pm' },
-            { icon: MapPin, title: 'Visit Us', value: '121 Library Lane', sub: 'Austin, TX 78701' },
             { icon: Clock, title: 'Support Hours', value: '24 / 7 Available', sub: 'Live chat & email' },
           ].map((c) => (
             <div
