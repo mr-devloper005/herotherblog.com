@@ -48,12 +48,6 @@ const milestones = [
   { year: '2025', title: '100k downloads', body: 'A milestone we celebrated with a redesign focused entirely on reading and discovery.' },
 ]
 
-const team = [
-  { name: 'Sarah Mitchell', role: 'Founder & CEO', img: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=600&q=60' },
-  { name: 'James Carter', role: 'Head of Community', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=60' },
-  { name: 'Emily Brooks', role: 'Content Director', img: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=600&q=60' },
-  { name: 'Michael Ross', role: 'Lead Designer', img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=600&q=60' },
-]
 
 export default function AboutPage() {
   return (
@@ -243,42 +237,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Team */}
-      <section className="bg-slate-50">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
-              Meet the Team
-            </h2>
-            <p className="mt-3 text-sm text-slate-500">
-              The people behind {SITE_CONFIG.name}.
-            </p>
-          </div>
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {team.map((m) => (
-              <div
-                key={m.name}
-                className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md"
-              >
-                <div className="relative h-56 overflow-hidden">
-                  <img
-                    src={m.img}
-                    alt={m.name}
-                    className="h-full w-full object-cover transition hover:scale-105"
-                  />
-                </div>
-                <div className="p-5 text-center">
-                  <h3 className="text-base font-semibold">{m.name}</h3>
-                  <p className="text-sm" style={{ color: ACCENT }}>
-                    {m.role}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
+      
       {/* CTA */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div

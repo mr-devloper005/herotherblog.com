@@ -21,7 +21,6 @@ const ACCENT = '#2563eb'
 const navLinks = [
   { name: 'Home', href: '/' },
   { name: 'Explore', href: '/pdf' },
-  { name: 'Profiles', href: '/profile' },
   { name: 'About Us', href: '/about' },
   { name: 'Contact Us', href: '/contact' },
 ]
@@ -48,10 +47,7 @@ export function NavbarOverride() {
             <div className="truncate text-sm font-bold leading-tight text-slate-900 sm:text-base">
               {SITE_CONFIG.name}
             </div>
-            <div className="hidden truncate text-[10px] uppercase tracking-wider text-slate-500 sm:block">
-              PDF Library &amp; Profiles
-            </div>
-          </div>
+                      </div>
         </Link>
 
         <div className="hidden items-center gap-7 lg:flex">

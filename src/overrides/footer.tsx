@@ -45,7 +45,6 @@ export function FooterOverride() {
             <h4 className="text-sm font-semibold uppercase tracking-wider text-white">Explore</h4>
             <ul className="mt-4 space-y-2.5 text-sm">
               <li><Link href="/pdf" className="hover:text-white">PDF Library</Link></li>
-              <li><Link href="/profile" className="hover:text-white">Browse Profiles</Link></li>
               <li><Link href="/pdf?category=new" className="hover:text-white">Latest Uploads</Link></li>
               <li><Link href="/pdf?category=popular" className="hover:text-white">Popular PDFs</Link></li>
             </ul>
@@ -55,7 +54,6 @@ export function FooterOverride() {
             <h4 className="text-sm font-semibold uppercase tracking-wider text-white">Services</h4>
             <ul className="mt-4 space-y-2.5 text-sm">
               <li><Link href="/pdf" className="hover:text-white">PDF Downloads</Link></li>
-              <li><Link href="/profile" className="hover:text-white">Author Profiles</Link></li>
               <li><Link href="/register" className="hover:text-white">Become a Contributor</Link></li>
               <li><Link href="/help" className="hover:text-white">Help Center</Link></li>
             </ul>
