@@ -162,8 +162,8 @@ export default async function ProfileDetailPage({ params }: { params: Promise<{ 
                         const cleanDescription = description.replace(/<[^>]*>/g, '');
                         const filteredDescription = cleanDescription.replace(/Aditya Scientific Instruments offers a comprehensive range of premium petroleum testing instruments designed to meet the rigorous demands of modern oil laboratories\. Our advanced e[^\s]*/g, '').trim();
                         return filteredDescription ? (
-                          <p className="text-lg text-slate-700 leading-relaxed" style={{ fontFamily: 'Georgia, serif', lineHeight: '1.6' }}>
-                            {filteredDescription.slice(0, 200)}...
+                          <p className="text-lg text-slate-700 leading-relaxed whitespace-pre-line" style={{ fontFamily: 'Georgia, serif', lineHeight: '1.6' }}>
+                            {filteredDescription}
                           </p>
                         ) : null;
                       })()}
